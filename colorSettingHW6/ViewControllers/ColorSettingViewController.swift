@@ -25,24 +25,33 @@ class ColorSettingViewController: UIViewController {
     
     @IBOutlet var colorWindow: UIView!
     
-    var colorRGB = [CGFloat]()
+    var colorRGB: [String: CGFloat]!
+    var delegate: ColorSettingViewControllerDelegate!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let colorRed = colorRGB[0]
-        let colorGreen = colorRGB[1]
-        let colorBlue = colorRGB[2]
+        let colorRed = colorRGB["red"] ?? 0
+        let colorGreen = colorRGB["green"] ?? 0
+        let colorBlue = colorRGB["blue"] ?? 0
+                
+        redTF.delegate = self
+        greenTF.delegate = self
+        blueTF.delegate = self
         
-        labelRed.text = String(format: "%.2f", colorRed)
-        labelGreen.text = String(format: "%.2f", colorGreen)
-        labelBlue.text = String(format: "%.2f", colorBlue)
-        
-        redTF.text = String(format: "%.2f", colorRed)
-        greenTF.text = String(format: "%.2f", colorGreen)
-        blueTF.text = String(format: "%.2f", colorBlue)
+        redTF.returnKeyType = .next
+        greenTF.returnKeyType = .next
+        blueTF.returnKeyType = .done
         
         colorWindow.layer.cornerRadius = 10
+        
+        updatingElementValues(
+            red: Float(colorRed),
+            green: Float(colorGreen),
+            blue: Float(colorBlue))
+        
         setColor(red: colorRed, green: colorGreen, blue: colorBlue)
+        
+        addTapGestureToHideKeyboard()
     }
     
     @IBAction func sliderAction(_ sender: UISlider) {
@@ -65,9 +74,21 @@ class ColorSettingViewController: UIViewController {
             blue: CGFloat(sliderBlue.value))
     }
       
-
+    @IBAction func doneAction() {
+        view.endEditing(true)
+        
+        let colorRGB = [
+            "red": CGFloat(sliderRed.value),
+            "green": CGFloat(sliderGreen.value),
+            "blue": CGFloat(sliderBlue.value)]
+        
+        delegate.setBackgroundColor(for: colorRGB)
+        dismiss(animated: true)
+    }
+    
 }
 
+// MARK: - Private Methods
 extension ColorSettingViewController {
     private func setColor(red: CGFloat, green: CGFloat, blue: CGFloat) {
         colorWindow.backgroundColor = UIColor(
@@ -75,5 +96,82 @@ extension ColorSettingViewController {
             green: green,
             blue: blue,
             alpha: 1)
+    }
+    
+    private func updatingElementValues(red: Float, green: Float, blue: Float) {
+        labelRed.text = String(format: "%.2f", red)
+        labelGreen.text = String(format: "%.2f", green)
+        labelBlue.text = String(format: "%.2f", blue)
+        
+        redTF.text = String(format: "%.2f", red)
+        greenTF.text = String(format: "%.2f", green)
+        blueTF.text = String(format: "%.2f", blue)
+        
+        sliderRed.value = red
+        sliderGreen.value = green
+        sliderBlue.value = blue
+    }
+    
+    private func updateColor() {
+        guard let newColorRed = redTF.text else { return }
+        guard let newColorGreen = greenTF.text else { return }
+        guard let newColorBlue = blueTF.text else { return }
+        
+        if let colorRed = Float(newColorRed),
+           let colorGreen = Float(newColorGreen),
+           let colorBlue = Float(newColorBlue) {
+            if colorRed <= 1.00
+                && colorRed >= 0.00
+                && colorGreen <= 1.00
+                && colorGreen >= 0.00
+                && colorBlue <= 1.00
+                && colorBlue >= 0.00 {
+                
+                updatingElementValues(red: colorRed, green: colorGreen, blue: colorBlue)
+      
+                setColor(
+                    red: CGFloat(colorRed),
+                    green: CGFloat(colorGreen),
+                    blue: CGFloat(colorBlue))
+            } else { showAlert(
+                title: "Ошибка",
+                massage: "Введите корректно данные") }
+        } else { showAlert(
+            title: "Ошибка",
+            massage: "Введите корректно данные") }
+    }
+}
+
+// MARK: - Keyboard Methods
+extension ColorSettingViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        updateColor()
+        
+        if textField == redTF {
+            greenTF.becomeFirstResponder()
+        } else if textField == greenTF {
+            blueTF.becomeFirstResponder()
+        } else if textField == blueTF {
+            doneAction()
+        }
+        return true
+    }
+    
+    private func addTapGestureToHideKeyboard() {
+        let tapGesture = UITapGestureRecognizer(
+            target: view,
+            action: #selector(view.endEditing))
+        view.addGestureRecognizer(tapGesture)
+    }
+}
+
+// MARK: - Private Methods Alert
+extension ColorSettingViewController {
+    private func showAlert(title: String, massage: String) {
+        let alert = UIAlertController(title: title, message: massage, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default)
+
+        alert.addAction(okAction)
+        present(alert, animated: true)
     }
 }

@@ -7,10 +7,10 @@
 
 import UIKit
 
-/*protocol ColorSettingViewControllerDelegate {
-    func setBackgroundColor(red: CGFloat, green: CGFloat, blue: CGFloat)
+protocol ColorSettingViewControllerDelegate {
+    func setBackgroundColor(for colorRGB: [String: CGFloat])
     
-}*/
+}
 
 class StartViewController: UIViewController {
 
@@ -25,23 +25,26 @@ class StartViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let colorSettingVC = segue.destination as? ColorSettingViewController else { return }
-        
-        let colorView = CIColor(color: view.backgroundColor ?? UIColor.systemBackground)
-        let colorRGB = [colorView.red, colorView.green, colorView.blue]
-        
+        let colorView = CIColor(color: view.backgroundColor  ?? UIColor.systemBackground)
+        let colorRGB = [
+            "red": colorView.red,
+            "green": colorView.green,
+            "blue": colorView.blue]
+    
         colorSettingVC.colorRGB = colorRGB
-    }
-
-    @IBAction func unwind(for segue: UIStoryboardSegue) {
-        
+        colorSettingVC.delegate = self
     }
 
 }
 
-/*extension StartViewController: ColorSettingViewControllerDelegate {
-    func setBackgroundColor(red: CGFloat, green: CGFloat) {
-        <#code#>
+extension StartViewController: ColorSettingViewControllerDelegate {    
+    func setBackgroundColor(for colorRGB: [String: CGFloat]) {
+        view.backgroundColor = UIColor(
+            red: colorRGB["red"] ?? 0,
+            green: colorRGB["green"] ?? 0,
+            blue: colorRGB["blue"] ?? 0,
+            alpha: 1)
     }
     
     
-}*/
+}
