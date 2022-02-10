@@ -25,19 +25,24 @@ class ColorSettingViewController: UIViewController {
     
     @IBOutlet var colorWindow: UIView!
     
+    var colorRGB = [CGFloat]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        let colorRed = colorRGB[0]
+        let colorGreen = colorRGB[1]
+        let colorBlue = colorRGB[2]
         
-        labelRed.text = String(format: "%.2f", sliderRed.value)
-        labelGreen.text = String(format: "%.2f", sliderGreen.value)
-        labelBlue.text = String(format: "%.2f", sliderBlue.value)
+        labelRed.text = String(format: "%.2f", colorRed)
+        labelGreen.text = String(format: "%.2f", colorGreen)
+        labelBlue.text = String(format: "%.2f", colorBlue)
         
-        redTF.text = String(format: "%.2f", sliderRed.value)
-        greenTF.text = String(format: "%.2f", sliderGreen.value)
-        blueTF.text = String(format: "%.2f", sliderBlue.value)
+        redTF.text = String(format: "%.2f", colorRed)
+        greenTF.text = String(format: "%.2f", colorGreen)
+        blueTF.text = String(format: "%.2f", colorBlue)
         
         colorWindow.layer.cornerRadius = 10
-        setColor()
+        setColor(red: colorRed, green: colorGreen, blue: colorBlue)
     }
     
     @IBAction func sliderAction(_ sender: UISlider) {
@@ -54,18 +59,21 @@ class ColorSettingViewController: UIViewController {
             blueTF.text = String(format: "%.2f", sliderBlue.value)
         }
         
-        setColor()
+        setColor(
+            red: CGFloat(sliderRed.value),
+            green: CGFloat(sliderGreen.value),
+            blue: CGFloat(sliderBlue.value))
     }
       
 
 }
 
 extension ColorSettingViewController {
-    private func setColor() {
+    private func setColor(red: CGFloat, green: CGFloat, blue: CGFloat) {
         colorWindow.backgroundColor = UIColor(
-            red: CGFloat(sliderRed.value),
-            green: CGFloat(sliderGreen.value),
-            blue: CGFloat(sliderBlue.value),
+            red: red,
+            green: green,
+            blue: blue,
             alpha: 1)
     }
 }
